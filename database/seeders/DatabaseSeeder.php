@@ -30,6 +30,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             DepartmentSeeder::class,
             TicketCategorySeeder::class,
+            SlaPolicySeeder::class,
             KnowledgebaseCategorySeeder::class,
             KnowledgebaseArticleSeeder::class,
             TicketSeeder::class,

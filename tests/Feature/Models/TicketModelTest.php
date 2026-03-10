@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\TicketStatus;
 use App\Models\Department;
 use App\Models\Ticket;
 use App\Models\TicketAttachment;
@@ -35,9 +36,9 @@ test('ticket has many attachments', function () {
 });
 
 test('ticket isOpen returns true for open status', function () {
-    expect(Ticket::factory()->create(['status' => 'open'])->isOpen())->toBeTrue();
-    expect(Ticket::factory()->create(['status' => 'in_progress'])->isOpen())->toBeTrue();
-    expect(Ticket::factory()->create(['status' => 'waiting_reply'])->isOpen())->toBeTrue();
+    expect(Ticket::factory()->create(['status' => TicketStatus::Open])->isOpen())->toBeTrue();
+    expect(Ticket::factory()->create(['status' => TicketStatus::InProgress])->isOpen())->toBeTrue();
+    expect(Ticket::factory()->create(['status' => TicketStatus::WaitingReply])->isOpen())->toBeTrue();
 });
 
 test('ticket isOpen returns false for resolved and closed', function () {

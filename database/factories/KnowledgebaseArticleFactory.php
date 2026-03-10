@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\KnowledgebaseArticleStatus;
 use App\Models\KnowledgebaseCategory;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -26,7 +27,7 @@ class KnowledgebaseArticleFactory extends Factory
             'body' => fake()->paragraphs(5, true),
             'knowledgebase_category_id' => KnowledgebaseCategory::factory(),
             'author_id' => User::factory(),
-            'status' => 'draft',
+            'status' => KnowledgebaseArticleStatus::Draft,
             'sort_order' => 0,
             'views_count' => 0,
             'published_at' => null,
@@ -36,7 +37,7 @@ class KnowledgebaseArticleFactory extends Factory
     public function published(): static
     {
         return $this->state(fn (array $attributes) => [
-            'status' => 'published',
+            'status' => KnowledgebaseArticleStatus::Published,
             'published_at' => now(),
         ]);
     }

@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\TicketPriority;
+use App\Enums\TicketStatus;
 use App\Filament\Resources\TicketResource\Pages;
 use App\Filament\Resources\TicketResource\RelationManagers\TicketRepliesRelationManager;
 use App\Models\Ticket;
@@ -23,7 +25,7 @@ class TicketResource extends Resource
     public static function getNavigationBadge(): ?string
     {
         return static::getModel()::query()
-            ->where('status', 'open')
+            ->where('status', TicketStatus::Open)
             ->count() ?: null;
     }
 
@@ -38,23 +40,12 @@ class TicketResource extends Resource
                 Forms\Components\RichEditor::make('description')
                     ->columnSpanFull(),
                 Forms\Components\Select::make('status')
-                    ->options([
-                        'open' => 'Open',
-                        'in_progress' => 'In Progress',
-                        'waiting_reply' => 'Waiting Reply',
-                        'resolved' => 'Resolved',
-                        'closed' => 'Closed',
-                    ])
-                    ->default('open')
+                    ->options(TicketStatus::class)
+                    ->default(TicketStatus::Open)
                     ->required(),
                 Forms\Components\Select::make('priority')
-                    ->options([
-                        'low' => 'Low',
-                        'medium' => 'Medium',
-                        'high' => 'High',
-                        'urgent' => 'Urgent',
-                    ])
-                    ->default('medium')
+                    ->options(TicketPriority::class)
+                    ->default(TicketPriority::Medium)
                     ->required(),
                 Forms\Components\Select::make('user_id')
                     ->relationship('user', 'name')
@@ -95,29 +86,40 @@ class TicketResource extends Resource
                     ->label('Customer')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')
-                    ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'open' => 'warning',
-                        'in_progress' => 'info',
-                        'waiting_reply' => 'gray',
-                        'resolved' => 'success',
-                        'closed' => 'gray',
-                        default => 'gray',
-                    }),
+                    ->badge(),
                 Tables\Columns\TextColumn::make('priority')
-                    ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'low' => 'gray',
-                        'medium' => 'info',
-                        'high' => 'warning',
-                        'urgent' => 'danger',
-                        default => 'gray',
-                    }),
+                    ->badge(),
                 Tables\Columns\TextColumn::make('department.name')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('assignedAgent.name')
                     ->label('Agent')
                     ->sortable(),
+                Tables\Columns\TextColumn::make('sla_status')
+                    ->label('SLA')
+                    ->badge()
+                    ->getStateUsing(fn (Ticket $record): string => $record->sla_status)
+                    ->color(fn (string $state): string => match ($state) {
+                        'on_track' => 'success',
+                        'at_risk' => 'warning',
+                        'breached' => 'danger',
+                        default => 'gray',
+                    })
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'on_track' => 'On Track',
+                        'at_risk' => 'At Risk',
+                        'breached' => 'Breached',
+                        default => 'No SLA',
+                    }),
+                Tables\Columns\TextColumn::make('first_response_due_at')
+                    ->label('Response Due')
+                    ->dateTime('M d, H:i')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('resolution_due_at')
+                    ->label('Resolution Due')
+                    ->dateTime('M d, H:i')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -125,22 +127,21 @@ class TicketResource extends Resource
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
-                    ->options([
-                        'open' => 'Open',
-                        'in_progress' => 'In Progress',
-                        'waiting_reply' => 'Waiting Reply',
-                        'resolved' => 'Resolved',
-                        'closed' => 'Closed',
-                    ]),
+                    ->options(TicketStatus::class),
                 Tables\Filters\SelectFilter::make('priority')
-                    ->options([
-                        'low' => 'Low',
-                        'medium' => 'Medium',
-                        'high' => 'High',
-                        'urgent' => 'Urgent',
-                    ]),
+                    ->options(TicketPriority::class),
                 Tables\Filters\SelectFilter::make('department')
                     ->relationship('department', 'name'),
+                Tables\Filters\TernaryFilter::make('sla_breached')
+                    ->label('SLA Breached')
+                    ->queries(
+                        true: fn (Tables\Filters\TernaryFilter $filter, $query) => $query->where(function ($q) {
+                            $q->where('first_response_breached', true)
+                                ->orWhere('resolution_breached', true);
+                        }),
+                        false: fn (Tables\Filters\TernaryFilter $filter, $query) => $query->where('first_response_breached', false)
+                            ->where('resolution_breached', false),
+                    ),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),

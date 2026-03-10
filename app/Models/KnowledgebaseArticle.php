@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\KnowledgebaseArticleStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -28,6 +29,7 @@ class KnowledgebaseArticle extends Model
     protected function casts(): array
     {
         return [
+            'status' => KnowledgebaseArticleStatus::class,
             'published_at' => 'datetime',
         ];
     }
@@ -49,12 +51,12 @@ class KnowledgebaseArticle extends Model
     }
 
     /**
-     * @param Builder<KnowledgebaseArticle> $query
+     * @param  Builder<KnowledgebaseArticle>  $query
      * @return Builder<KnowledgebaseArticle>
      */
     public function scopePublished(Builder $query): Builder
     {
-        return $query->where('status', 'published')->whereNotNull('published_at');
+        return $query->where('status', KnowledgebaseArticleStatus::Published)->whereNotNull('published_at');
     }
 
     public function incrementViews(): void

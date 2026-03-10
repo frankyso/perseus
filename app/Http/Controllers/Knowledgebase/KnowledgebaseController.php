@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Knowledgebase;
 
+use App\Enums\KnowledgebaseArticleStatus;
 use App\Http\Controllers\Controller;
 use App\Models\KnowledgebaseArticle;
 use App\Models\KnowledgebaseCategory;
@@ -50,7 +51,7 @@ class KnowledgebaseController extends Controller
     public function show(KnowledgebaseCategory $category, KnowledgebaseArticle $article): Response
     {
         abort_unless($category->is_active, 404);
-        abort_unless($article->status === 'published' && $article->published_at !== null, 404);
+        abort_unless($article->status === KnowledgebaseArticleStatus::Published && $article->published_at !== null, 404);
 
         $article->incrementViews();
 

@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\KnowledgebaseArticleStatus;
 use App\Models\KnowledgebaseArticle;
 use App\Models\KnowledgebaseCategory;
 use App\Models\User;
@@ -25,7 +26,7 @@ test('article belongs to author', function () {
 test('published scope filters correctly', function () {
     KnowledgebaseArticle::factory()->published()->count(2)->create();
     KnowledgebaseArticle::factory()->count(3)->create([
-        'status' => 'draft',
+        'status' => KnowledgebaseArticleStatus::Draft,
         'published_at' => null,
     ]);
 

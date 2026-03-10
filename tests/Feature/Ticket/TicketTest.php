@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\TicketStatus;
 use App\Models\Department;
 use App\Models\Ticket;
 use App\Models\TicketCategory;
@@ -52,7 +53,7 @@ test('authenticated user can create a ticket with valid data', function () {
 
     expect($ticket)->not->toBeNull();
     expect($ticket->subject)->toBe('Test ticket subject');
-    expect($ticket->status)->toBe('open');
+    expect($ticket->status)->toBe(TicketStatus::Open);
 
     $response->assertRedirect(route('tickets.show', $ticket));
 });

@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\KnowledgebaseArticleStatus;
 use App\Models\KnowledgebaseArticle;
 use App\Models\KnowledgebaseCategory;
 
@@ -50,7 +51,7 @@ test('category page does not show draft articles', function () {
     ]);
     KnowledgebaseArticle::factory()->create([
         'knowledgebase_category_id' => $category->id,
-        'status' => 'draft',
+        'status' => KnowledgebaseArticleStatus::Draft,
         'published_at' => null,
     ]);
 
@@ -122,7 +123,7 @@ test('search does not return draft articles', function () {
         'knowledgebase_category_id' => $category->id,
         'title' => 'Draft article about secrets',
         'body' => 'This should not appear in search.',
-        'status' => 'draft',
+        'status' => KnowledgebaseArticleStatus::Draft,
         'published_at' => null,
     ]);
 

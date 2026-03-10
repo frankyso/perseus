@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Ticket;
 
+use App\Enums\TicketPriority;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -28,7 +29,7 @@ class StoreTicketRequest extends FormRequest
             'description' => ['required', 'string'],
             'department_id' => ['nullable', 'integer', Rule::exists('departments', 'id')],
             'category_id' => ['nullable', 'integer', Rule::exists('ticket_categories', 'id')],
-            'priority' => ['required', 'string', Rule::in(['low', 'medium', 'high', 'urgent'])],
+            'priority' => ['required', 'string', Rule::enum(TicketPriority::class)],
             'attachments' => ['nullable', 'array'],
             'attachments.*' => ['file', 'max:10240', 'mimes:jpg,jpeg,png,gif,pdf,doc,docx,txt,zip'],
         ];

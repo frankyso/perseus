@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Ticket;
 
+use App\Enums\TicketStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Ticket\StoreTicketRequest;
 use App\Models\Department;
@@ -54,7 +55,7 @@ class TicketController extends Controller
         $ticket = Ticket::query()->create([
             ...$request->safe()->except('attachments'),
             'user_id' => $request->user()->id,
-            'status' => 'open',
+            'status' => TicketStatus::Open,
         ]);
 
         if ($request->hasFile('attachments')) {

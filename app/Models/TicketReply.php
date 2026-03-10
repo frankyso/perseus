@@ -26,6 +26,22 @@ class TicketReply extends Model
         ];
     }
 
+    protected static function booted(): void
+    {
+        static::created(function (TicketReply $reply): void {
+            if ($reply->is_internal_note) {
+                return;
+            }
+
+            $ticket = $reply->ticket;
+            $user = $reply->user;
+
+            if ($user && $user->id !== $ticket->user_id) {
+                $ticket->recordFirstResponse();
+            }
+        });
+    }
+
     /**
      * @return BelongsTo<Ticket, $this>
      */

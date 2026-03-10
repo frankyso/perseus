@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Enums\TicketPriority;
+use App\Enums\TicketStatus;
 use App\Models\Department;
 use App\Models\TicketCategory;
 use App\Models\User;
@@ -20,8 +22,8 @@ class TicketFactory extends Factory
         return [
             'subject' => fake()->sentence(),
             'description' => fake()->paragraphs(3, true),
-            'status' => 'open',
-            'priority' => fake()->randomElement(['low', 'medium', 'high', 'urgent']),
+            'status' => TicketStatus::Open,
+            'priority' => fake()->randomElement(TicketPriority::cases()),
             'user_id' => User::factory(),
             'department_id' => Department::factory(),
             'category_id' => TicketCategory::factory(),
@@ -31,7 +33,7 @@ class TicketFactory extends Factory
     public function resolved(): static
     {
         return $this->state(fn (array $attributes) => [
-            'status' => 'resolved',
+            'status' => TicketStatus::Resolved,
             'resolved_at' => now(),
         ]);
     }
@@ -39,7 +41,7 @@ class TicketFactory extends Factory
     public function closed(): static
     {
         return $this->state(fn (array $attributes) => [
-            'status' => 'closed',
+            'status' => TicketStatus::Closed,
             'resolved_at' => now()->subDay(),
             'closed_at' => now(),
         ]);
@@ -49,14 +51,14 @@ class TicketFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'assigned_to' => $agent->id,
-            'status' => 'in_progress',
+            'status' => TicketStatus::InProgress,
         ]);
     }
 
     public function urgent(): static
     {
         return $this->state(fn (array $attributes) => [
-            'priority' => 'urgent',
+            'priority' => TicketPriority::Urgent,
         ]);
     }
 }

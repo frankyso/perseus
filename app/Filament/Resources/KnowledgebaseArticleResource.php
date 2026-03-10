@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\KnowledgebaseArticleStatus;
 use App\Filament\Resources\KnowledgebaseArticleResource\Pages;
 use App\Models\KnowledgebaseArticle;
 use Filament\Forms;
@@ -45,11 +46,8 @@ class KnowledgebaseArticleResource extends Resource
                     ->searchable()
                     ->label('Category'),
                 Forms\Components\Select::make('status')
-                    ->options([
-                        'draft' => 'Draft',
-                        'published' => 'Published',
-                    ])
-                    ->default('draft')
+                    ->options(KnowledgebaseArticleStatus::class)
+                    ->default(KnowledgebaseArticleStatus::Draft)
                     ->required(),
                 Forms\Components\DateTimePicker::make('published_at'),
                 Forms\Components\TextInput::make('sort_order')
@@ -70,12 +68,7 @@ class KnowledgebaseArticleResource extends Resource
                 Tables\Columns\TextColumn::make('author.name')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')
-                    ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'draft' => 'gray',
-                        'published' => 'success',
-                        default => 'gray',
-                    }),
+                    ->badge(),
                 Tables\Columns\TextColumn::make('views_count')
                     ->label('Views')
                     ->sortable(),
@@ -89,10 +82,7 @@ class KnowledgebaseArticleResource extends Resource
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
-                    ->options([
-                        'draft' => 'Draft',
-                        'published' => 'Published',
-                    ]),
+                    ->options(KnowledgebaseArticleStatus::class),
                 Tables\Filters\SelectFilter::make('category')
                     ->relationship('category', 'name'),
             ])

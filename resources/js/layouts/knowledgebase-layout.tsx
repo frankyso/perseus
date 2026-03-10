@@ -1,11 +1,17 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, Ticket } from 'lucide-react';
+import { BookOpen, Moon, Sun, Ticket } from 'lucide-react';
 import AppLogoIcon from '@/components/app-logo-icon';
 import { Button } from '@/components/ui/button';
+import { useAppearance } from '@/hooks/use-appearance';
 import type { Auth } from '@/types/auth';
 
 export default function KnowledgebaseLayout({ children }: { children: React.ReactNode }) {
     const { auth } = usePage<{ auth: Auth }>().props;
+    const { resolvedAppearance, updateAppearance } = useAppearance();
+
+    function toggleTheme() {
+        updateAppearance(resolvedAppearance === 'dark' ? 'light' : 'dark');
+    }
 
     return (
         <div className="min-h-screen bg-background">
@@ -19,6 +25,19 @@ export default function KnowledgebaseLayout({ children }: { children: React.Reac
                     </Link>
 
                     <div className="flex items-center gap-2">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-8"
+                            onClick={toggleTheme}
+                            aria-label="Toggle dark mode"
+                        >
+                            {resolvedAppearance === 'dark' ? (
+                                <Sun className="size-4" />
+                            ) : (
+                                <Moon className="size-4" />
+                            )}
+                        </Button>
                         {auth?.user ? (
                             <>
                                 <Button variant="ghost" size="sm" asChild>

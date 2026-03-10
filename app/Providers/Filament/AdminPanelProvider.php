@@ -29,11 +29,12 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->colors([
-                'primary' => Color::Indigo,
+                'primary' => Color::hex('#E86B18'),
                 'danger' => Color::Red,
                 'success' => Color::Green,
                 'warning' => Color::Amber,
             ])
+            ->brandName('Perseus')
             ->navigationGroups([
                 NavigationGroup::make('Support'),
                 NavigationGroup::make('Knowledgebase'),

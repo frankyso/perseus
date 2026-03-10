@@ -7,11 +7,12 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Laravel\Scout\Searchable;
 
 class KnowledgebaseArticle extends Model
 {
     /** @use HasFactory<\Database\Factories\KnowledgebaseArticleFactory> */
-    use HasFactory;
+    use HasFactory, Searchable;
 
     protected $fillable = [
         'title',
@@ -57,6 +58,29 @@ class KnowledgebaseArticle extends Model
     public function scopePublished(Builder $query): Builder
     {
         return $query->where('status', KnowledgebaseArticleStatus::Published)->whereNotNull('published_at');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => (int) $this->id,
+            'title' => $this->title,
+            'excerpt' => $this->excerpt,
+            'body' => strip_tags($this->body ?? ''),
+            'status' => $this->getRawOriginal('status'),
+            'knowledgebase_category_id' => (int) $this->knowledgebase_category_id,
+            'published_at' => $this->published_at?->timestamp,
+            'views_count' => (int) $this->views_count,
+            'sort_order' => (int) $this->sort_order,
+        ];
+    }
+
+    public function shouldBeSearchable(): bool
+    {
+        return $this->getRawOriginal('status') === 'published' && $this->published_at !== null;
     }
 
     public function incrementViews(): void

@@ -64,27 +64,40 @@ class KnowledgebaseController extends Controller
     }
 
     /**
-     * Search knowledgebase articles.
+     * Search knowledgebase articles using Scout (Meilisearch) with database fallback.
      */
     public function search(Request $request): Response
     {
         $query = $request->input('query', '');
 
-        $articles = KnowledgebaseArticle::query()
-            ->published()
-            ->when($query, function ($builder) use ($query) {
-                $builder->where(function ($q) use ($query) {
-                    $q->where('title', 'like', "%{$query}%")
-                        ->orWhere('body', 'like', "%{$query}%");
-                });
-            })
-            ->with('category')
-            ->paginate(15)
-            ->withQueryString();
+        if ($query && $this->shouldUseScoutSearch()) {
+            $articles = KnowledgebaseArticle::search($query)
+                ->where('status', 'published')
+                ->query(fn ($builder) => $builder->with('category'))
+                ->paginate(15)
+                ->withQueryString();
+        } else {
+            $articles = KnowledgebaseArticle::query()
+                ->published()
+                ->when($query, function ($builder) use ($query) {
+                    $builder->where(function ($q) use ($query) {
+                        $q->where('title', 'like', "%{$query}%")
+                            ->orWhere('body', 'like', "%{$query}%");
+                    });
+                })
+                ->with('category')
+                ->paginate(15)
+                ->withQueryString();
+        }
 
         return Inertia::render('knowledgebase/search', [
             'articles' => $articles,
             'query' => $query,
         ]);
+    }
+
+    private function shouldUseScoutSearch(): bool
+    {
+        return in_array(config('scout.driver'), ['meilisearch', 'algolia', 'typesense']);
     }
 }
